@@ -8,6 +8,7 @@ import {
   simplifySlug,
   splitAnchor,
   transformLink,
+  joinSegments,
 } from "../../util/path"
 import path from "path"
 import { visit } from "unist-util-visit"
@@ -40,7 +41,7 @@ export const CrawlLinks: QuartzTransformerPlugin<Partial<Options> | undefined> =
       return [
         () => {
           return (tree: Root, file) => {
-            const curSlug = simplifySlug(file.data.slug!, false)
+            const curSlug = simplifySlug(file.data.slug!)
             const outgoing: Set<SimpleSlug> = new Set()
 
             const transformOptions: TransformOptions = {
@@ -107,7 +108,7 @@ export const CrawlLinks: QuartzTransformerPlugin<Partial<Options> | undefined> =
 
                   // url.resolve is considered legacy
                   // WHATWG equivalent https://nodejs.dev/en/api/v18/url/#urlresolvefrom-to
-                  const url = new URL(dest, `https://base.com/${curSlug}`)
+                  const url = new URL(dest, joinSegments(`https://base.com/`, curSlug))
                   const canonicalDest = url.pathname
                   let [destCanonical, _destAnchor] = splitAnchor(canonicalDest)
                   if (destCanonical.endsWith("/")) {
