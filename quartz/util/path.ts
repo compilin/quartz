@@ -75,9 +75,9 @@ export function slugifyFilePath(fp: FilePath, excludeExt?: boolean): FullSlug {
   return (slug + ext) as FullSlug
 }
 
-export function simplifySlug(fp: FullSlug): SimpleSlug {
+export function simplifySlug(fp: FullSlug, slashIndex = true): SimpleSlug {
   const res = _stripSlashes(_trimSuffix(fp, "index"), true)
-  return (res.length === 0 ? "/" : res) as SimpleSlug
+  return (res.length === 0 && slashIndex ? "/" : res) as SimpleSlug
 }
 
 export function transformInternalLink(link: string): RelativeURL {
