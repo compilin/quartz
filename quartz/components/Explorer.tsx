@@ -12,6 +12,7 @@ import { i18n } from "../i18n"
 const defaultOptions = {
   folderClickBehavior: "collapse",
   folderDefaultState: "collapsed",
+  showRootIndex: false,
   useSavedState: true,
   mapFn: (node) => {
     return node
@@ -52,7 +53,7 @@ export default ((userOpts?: Partial<Options>) => {
 
     // Construct tree from allFiles
     fileTree = new FileNode("")
-    allFiles.forEach((file) => fileTree.add(file))
+    allFiles.forEach((file) => fileTree.add(file, opts))
 
     // Execute all functions (sort, filter, map) that were provided (if none were provided, only default "sort" is applied)
     if (opts.order) {

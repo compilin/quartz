@@ -15,6 +15,7 @@ export interface Options {
   title?: string
   folderDefaultState: "collapsed" | "open"
   folderClickBehavior: "collapse" | "link"
+  showRootIndex: boolean
   useSavedState: boolean
   sortFn: (a: FileNode, b: FileNode) => number
   filterFn: (node: FileNode) => boolean
@@ -56,7 +57,7 @@ export class FileNode {
     this.depth = depth ?? 0
   }
 
-  private insert(fileData: DataWrapper) {
+  private insert(fileData: DataWrapper, opts: Options) {
     if (fileData.path.length === 0) {
       return
     }
@@ -65,10 +66,12 @@ export class FileNode {
 
     // base case, insert here
     if (fileData.path.length === 1) {
-      if (nextSegment === "") {
-        // index case (we are the root and we just found index.md), set our data appropriately
-        const title = fileData.file.frontmatter?.title
-        if (title && title !== "index") {
+      const title = fileData.file.frontmatter?.title
+      const hasTitle = title && title !== "index"
+      if (nextSegment === "" && (!opts.showRootIndex || this.depth > 0 || !hasTitle)) {
+        /*  Folder index case (index.md), set our data appropriately. If this is the root index
+         and it as a custom title and showRootIndex is true, then treat it as a normal page */
+        if (hasTitle) {
           this.displayName = title
         }
       } else {
@@ -83,7 +86,7 @@ export class FileNode {
     fileData.path = fileData.path.splice(1)
     const child = this.children.find((c) => c.name === nextSegment)
     if (child) {
-      child.insert(fileData)
+      child.insert(fileData, opts)
       return
     }
 
@@ -93,13 +96,13 @@ export class FileNode {
       undefined,
       this.depth + 1,
     )
-    newChild.insert(fileData)
+    newChild.insert(fileData, opts)
     this.children.push(newChild)
   }
 
   // Add new file to tree
-  add(file: QuartzPluginData) {
-    this.insert({ file: file, path: simplifySlug(file.slug!).split("/") })
+  add(file: QuartzPluginData, opts: Options) {
+    this.insert({ file: file, path: simplifySlug(file.slug!, false).split("/") }, opts)
   }
 
   /**
